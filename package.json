@@ -11,6 +11,7 @@
     "prettier-plugin-solidity": "latest"
   },
   "scripts": {
-    "prettier:solidity": "./node_modules/.bin/prettier --write 'contracts/**/*.sol'"
+    "prettier:solidity": "./node_modules/.bin/prettier --write 'contracts/**/*.sol'",
+    "prettier:js": "./node_modules/.bin/prettier --write 'pocs/**/*.js'"
   }
 }
