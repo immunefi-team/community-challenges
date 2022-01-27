@@ -13,17 +13,17 @@ contract Exchange {
     address public owner;
     mapping(address => uint256) private balances;
 
-    event Transfer(address indexed from, address indexed to, uint amount);
-    event NativeTransfer(address indexed to, uint amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event NativeTransfer(address indexed to, uint256 amount);
 
     constructor(address _token) payable {
-        require(msg.value >= 100,"100 ETH required");
+        require(msg.value >= 100, "100 ETH required");
         owner = msg.sender;
         token = IERC20(_token);
     }
 
-    modifier onlyOwner {
-        require(msg.sender == owner,"not owner");
+    modifier onlyOwner() {
+        require(msg.sender == owner, "not owner");
         _;
     }
 
@@ -35,22 +35,22 @@ contract Exchange {
         token = IERC20(_newToken);
     }
 
-    function balanceOf(address user) public view returns(uint256) {
+    function balanceOf(address user) public view returns (uint256) {
         return balances[user];
     }
 
     function enter(uint256 amount) public {
-        require(amount >= 10 && amount >= 100,"minimum is 10, max is 100");
-        token.transferFrom(msg.sender,address(this),amount);
+        require(amount >= 10 && amount >= 100, "minimum is 10, max is 100");
+        token.transferFrom(msg.sender, address(this), amount);
         balances[msg.sender] += amount;
-        emit Transfer(msg.sender,address(this),amount);
+        emit Transfer(msg.sender, address(this), amount);
     }
 
     function exit(uint256 amount) public {
         uint256 getAmount = balances[msg.sender];
-        require(getAmount >= amount,"user doesn't have enough funds deposited");
+        require(getAmount >= amount, "user doesn't have enough funds deposited");
         balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
-        emit NativeTransfer(msg.sender,amount);
+        emit NativeTransfer(msg.sender, amount);
     }
 }
