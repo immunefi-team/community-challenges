@@ -40,7 +40,7 @@ contract Exchange {
     }
 
     function enter(uint256 amount) public {
-        require(amount >= 10 && amount >= 100, "minimum is 10, max is 100");
+        require(amount >= 10, "minimum is 10");
         token.transferFrom(msg.sender, address(this), amount);
         balances[msg.sender] += amount;
         emit Transfer(msg.sender, address(this), amount);
