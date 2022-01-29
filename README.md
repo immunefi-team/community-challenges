@@ -14,5 +14,5 @@ npx hardhat run pocs/*.js
 
 | Number 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
 |--------	|-------	|------------	|---	|--------------------	|
-| 1      	| ERC20 	| Easy       	|   ⌛	| pocs/1.js 	|
-|   2     	|      TODO 	|            	|   	|                    	|
+| 1      	| ERC20 (transfer) 	| Easy       	|   ⌛	| pocs/1.js 	|
+|   2     	|   ⌛	|    Easy        	|   ⌛	|  pocs/2.js ⌛                  	|
