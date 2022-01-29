@@ -2,8 +2,8 @@
 // https://github.com/Dexaran/ERC223-token-standard/blob/development/token/ERC223/ERC223.sol
 pragma solidity ^0.8.0;
 
-import "../interfaces/IERC223.sol";
-import "../interfaces/IERC223Recipient.sol";
+import {IERC223} from "../interfaces/IERC223.sol";
+import {IERC223Recipient} from "../interfaces/IERC223Recipient.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 /**
