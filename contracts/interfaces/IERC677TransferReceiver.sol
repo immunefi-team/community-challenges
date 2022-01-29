@@ -7,9 +7,9 @@ pragma solidity ^0.8.0;
  * See https://github.com/ethereum/EIPs/issues/677 for details.
  */
 interface IERC677TransferReceiver {
-  function tokenFallback(
-    address from,
-    uint256 amount,
-    bytes calldata data
-  ) external returns (bool);
+    function tokenFallback(
+        address from,
+        uint256 amount,
+        bytes calldata data
+    ) external returns (bool);
 }

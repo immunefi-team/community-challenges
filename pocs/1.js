@@ -22,7 +22,7 @@ async function deploy(deployer) {
 }
 
 async function main() {
-    console.log("CHALLENGE - 1\n")
+    console.log("CHALLENGE - 1\n");
     let [deployer, user1, user2, attacker] = await ethers.getSigners();
     let [stoken, exchange] = await deploy(deployer);
 
@@ -51,7 +51,10 @@ async function main() {
     console.log("\nEXPLOIT: \n");
 
     let attackerBeforeBal = await ethers.provider.getBalance(attacker.address);
-    console.log("token balance of {attacker} :", await ethers.utils.formatEther(await stoken.balanceOf(attacker.address)));
+    console.log(
+        "token balance of {attacker} :",
+        await ethers.utils.formatEther(await stoken.balanceOf(attacker.address))
+    );
     console.log("Before: ETH Balance {attacker} :", await ethers.utils.formatEther(userBeforeBal));
 
     await exchange.connect(attacker).enter(FIFTY_ETHER);

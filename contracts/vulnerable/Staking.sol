@@ -15,7 +15,7 @@ contract Staking {
     event Staked(address indexed user, uint256 amount);
     event Unstaked(address indexed user, uint256 amount);
 
-    constructor(address _token,uint256 _reward) payable {
+    constructor(address _token, uint256 _reward) payable {
         require(msg.value >= 100, "100 ETH required");
         owner = msg.sender;
         token = IERC223(_token);
@@ -37,19 +37,23 @@ contract Staking {
         uint256 userBal = balances[msg.sender];
         require(userBal >= amount, "Staking: user doesn't have enough deposited funds");
         uint256 stakedDiff = block.timestamp - stakeDuration[msg.sender];
-        require(stakedDiff >= 604800,"Staking: wait till 7 days elapsed");
+        require(stakedDiff >= 604800, "Staking: wait till 7 days elapsed");
         if (!rewardClaimed[msg.sender]) {
-            payable(msg.sender).send(reward); 
+            payable(msg.sender).send(reward);
             rewardClaimed[msg.sender] = true;
         }
-        token.transfer(msg.sender,amount);
+        token.transfer(msg.sender, amount);
         balances[msg.sender] = userBal - amount;
         emit Unstaked(msg.sender, amount);
     }
 
-     function tokenReceived(address _from, uint _amount, bytes memory _data) public {
-         require(msg.sender == address(token),"Staking: Call only allowed from ERC223 token");
-         require(_amount > 0,"Staking: Non-zero");
-         _stake(_from,_amount);
-     }
+    function tokenReceived(
+        address _from,
+        uint256 _amount,
+        bytes memory _data
+    ) public {
+        require(msg.sender == address(token), "Staking: Call only allowed from ERC223 token");
+        require(_amount > 0, "Staking: Non-zero");
+        _stake(_from, _amount);
+    }
 }
