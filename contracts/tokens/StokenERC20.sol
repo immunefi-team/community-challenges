@@ -7,7 +7,7 @@ contract StokenERC20 is IERC20 {
     mapping(address => uint256) public override balanceOf;
     mapping(address => mapping(address => uint256)) public override allowance;
 
-    uint256 public override totalSupply;
+    uint256 public immutable override totalSupply;
     string public constant name = "STOKEN";
     string public constant symbol = "SETH";
     uint8 public constant decimals = 18;
