@@ -19,13 +19,15 @@ contract StokenERC20 is IERC20 {
     }
 
     function transfer(address _to, uint256 _value) public override returns (bool) {
-        if (balanceOf[msg.sender] >= _value && balanceOf[_to] + _value >= balanceOf[_to]) {
-            balanceOf[msg.sender] -= _value;
-            balanceOf[_to] += _value;
-            emit Transfer(msg.sender, _to, _value);
-            return true;
-        } else {
-            return false;
+        unchecked {
+            if (balanceOf[msg.sender] >= _value && balanceOf[_to] + _value >= balanceOf[_to]) {
+                balanceOf[msg.sender] -= _value;
+                balanceOf[_to] += _value;
+                emit Transfer(msg.sender, _to, _value);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -34,19 +36,21 @@ contract StokenERC20 is IERC20 {
         address _to,
         uint256 _value
     ) public override returns (bool) {
-        if (
-            balanceOf[_from] >= _value &&
-            allowance[_from][msg.sender] >= _value &&
-            balanceOf[_to] + _value >= balanceOf[_to]
-        ) {
-            balanceOf[_to] += _value;
-            balanceOf[_from] -= _value;
-            emit Transfer(_from, _to, _value);
-            allowance[_from][msg.sender] -= _value;
-            emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
-            return true;
-        } else {
-            return false;
+        unchecked {
+            if (
+                balanceOf[_from] >= _value &&
+                allowance[_from][msg.sender] >= _value &&
+                balanceOf[_to] + _value >= balanceOf[_to]
+            ) {
+                balanceOf[_to] += _value;
+                balanceOf[_from] -= _value;
+                emit Transfer(_from, _to, _value);
+                allowance[_from][msg.sender] -= _value;
+                emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
