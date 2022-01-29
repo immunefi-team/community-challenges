@@ -22,6 +22,7 @@ async function deploy(deployer) {
 }
 
 async function main() {
+    console.log("CHALLENGE - 1\n")
     let [deployer, user1, user2] = await ethers.getSigners();
     let [stoken, exchange] = await deploy(deployer);
 
@@ -35,6 +36,9 @@ async function main() {
     console.log("token balance of {user2} :", await ethers.utils.formatEther(await stoken.balanceOf(user2.address)));
 
     // POC can go here
+
+    console.log("\nEXPLOIT TODO\n");
+   
 }
 
 main()

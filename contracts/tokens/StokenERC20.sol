@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "./interfaces/IERC20.sol";
+import "../interfaces/IERC20.sol";
 
 contract StokenERC20 is IERC20 {
     mapping(address => uint256) public override balanceOf;
