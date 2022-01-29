@@ -1,0 +1,13 @@
+on: [push,pull_request]
+
+jobs:
+  main_job:
+    runs-on: ubuntu-latest
+    name: Hardhat tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+      - run: npm install
+      - run: npx hardhat run pocs/*.js 
