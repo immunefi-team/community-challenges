@@ -51,8 +51,8 @@ contract MockERC223 is IERC223 {
     ) public override returns (bool success) {
         // Standard function transfer similar to ERC20 transfer with no _data .
         // Added due to backwards compatibility reasons .
-        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
-        balanceOf[_to] = balanceOf[_to] + _value;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
         if (Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _data);
         }
@@ -72,8 +72,8 @@ contract MockERC223 is IERC223 {
      */
     function transfer(address _to, uint256 _value) public override returns (bool success) {
         bytes memory _empty = hex"00000000";
-        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
-        balanceOf[_to] = balanceOf[_to] + _value;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
         if (Address.isContract(_to)) {
             IERC223Recipient(_to).tokenReceived(msg.sender, _value, _empty);
         }
