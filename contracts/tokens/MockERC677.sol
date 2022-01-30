@@ -31,20 +31,21 @@ contract ERC677 is IERC677, ERC20 {
 
         emit Transfer(msg.sender, to, value, data);
 
-        IERC677TransferReceiver receiver = IERC677TransferReceiver(to);
-        // slither-disable-next-line unused-return
-        receiver.tokenFallback(msg.sender, value, data);
+        // IMPORTANT: the ERC-677 specification does not say anything about the
+        // use of the receiver contract's tokenFallback method return
+        // value. Given its return type matches with this method's return type,
+        // returning it could be a possibility. Here we take the more
+        // conservative approach and decode the return value if it's present,
+        // otherwise we assume no revert signals a succesful transfer.
+        bytes memory returnData;
+        (result, returnData) = to.call(
+            abi.encodeWithSelector(IERC677TransferReceiver.tokenFallback.selector, msg.sender, value, data)
+        );
+        require(
+            result && (returnData.length == 0 || abi.decode(returnData, (bool))),
+            "ERC677: transfer to non ERC677Receiver implementer"
+        );
 
-        // IMPORTANT: the ERC-677 specification does not say
-        // anything about the use of the receiver contract's
-        // tokenFallback method return value. Given
-        // its return type matches with this method's return
-        // type, returning it could be a possibility.
-        // We here take the more conservative approach and
-        // ignore the return value, returning true
-        // to signal a succesful transfer despite tokenFallback's
-        // return value -- fact being tokens are transferred
-        // in any case.
         return true;
     }
 }
