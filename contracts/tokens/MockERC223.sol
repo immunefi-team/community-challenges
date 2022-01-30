@@ -12,8 +12,8 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 contract MockERC223 is IERC223 {
     uint256 private _totalSupply;
 
-    string public constant _name = "STOKEN";
-    string public constant _symbol = "SETH";
+    string public constant _name = "M223Token";
+    string public constant _symbol = "M223";
     uint8 public constant _decimals = 18;
     
     mapping(address => uint256) public balances; // List of user balances.
