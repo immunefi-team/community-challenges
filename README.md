@@ -17,5 +17,5 @@ for i in pocs/*.js; do npx hardhat run $i; done
 
 | Contracts 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
 |--------	|-------	|------------	|---	|--------------------	|
-| Exchange.sol,StokenERC20.sol      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
-| Staking.sol,MockERC223.sol     	|   ⌛	|    Easy        	|   ⌛	|   ⌛                  	|
+| `vulnerable/Exchange.sol`,<br/>`tokens/StokenERC20.sol`      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
+| `vulnerable/Staking.sol`,<br/>`tokens/MockERC223.sol`    	|   ⌛	|    Easy        	|   ⌛	|   ⌛                  	|
