@@ -1,12 +1,14 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { blockchainNow,setBlockchainTime } = require("./utils/helpers.js");
+const abiCoder = ethers.utils.defaultAbiCoder; //An AbiCoder created when the library is imported which is used by the Interface.
 
 const ONE_ETHER = ethers.utils.parseUnits("1", "ether");
 const FIFTY_ETHER = ethers.utils.parseUnits("50", "ether");
 const REWARD_AMOUNT = ethers.utils.parseUnits("0.1","ether");
 
 async function deploy(deployer) {
-    let deployTokens = ethers.utils.parseUnits("1000", "ether");
+    let deployTokens = ethers.utils.parseUnits("10000", "ether");
 
     // Deploy ERC223 token
     const mockERC223 = await ethers.getContractFactory("MockERC223", deployer);
@@ -25,21 +27,19 @@ async function deploy(deployer) {
 
 async function main() {
     console.log("CHALLENGE - 2\n")
-    let [deployer, user1, user2] = await ethers.getSigners();
+    let [deployer, user1, attacker] = await ethers.getSigners();
     let [mtoken, staking] = await deploy(deployer);
 
     console.log("ERC223 token :", mtoken.address);
     console.log("STAKING contract :", staking.address);
 
-    await mtoken.name();
-    await mtoken.connect(deployer)["transfer(address,uint256)"](user1.address,FIFTY_ETHER);
-    await mtoken.connect(deployer)["transfer(address,uint256)"](user2.address,FIFTY_ETHER);
+    await mtoken.connect(deployer)["transfer(address,uint256)"](user1.address,FIFTY_ETHER.mul(10));
+    await mtoken.connect(deployer)["transfer(address,uint256)"](attacker.address,FIFTY_ETHER);
 
+    // user1 staking in the contract.
+    await mtoken.connect(user1)["transfer(address,uint256)"](staking.address,FIFTY_ETHER.mul(10));
+
+    // POC can go here:
 }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error);
-        process.exit(1);
-    });
+main();

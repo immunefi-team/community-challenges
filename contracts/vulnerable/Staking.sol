@@ -26,26 +26,30 @@ contract Staking {
         return balances[user];
     }
 
-    function stake(uint256 amount) public {
-        require(amount >= 10, "minimum is 10");
-        token.transfer(address(this), amount);
-        balances[msg.sender] += amount;
-        stakeDuration[msg.sender] = block.timestamp;
-        rewardClaimed[msg.sender] = false;
-        emit Staked(msg.sender, amount);
+    function _stake(address user, uint256 amount) internal {
+        balances[user] += amount;
+        stakeDuration[user] = block.timestamp;
+        rewardClaimed[user] = false;
+        emit Staked(user, amount);
     }
 
     function unstake(uint256 amount) public {
-        require(balances[msg.sender] >= amount, "user doesn't have enough deposited funds");
+        uint256 userBal = balances[msg.sender];
+        require(userBal >= amount, "Staking: user doesn't have enough deposited funds");
         uint256 stakedDiff = block.timestamp - stakeDuration[msg.sender];
-        require(stakedDiff >= 604800,"wait till 7 days elapsed");
+        require(stakedDiff >= 604800,"Staking: wait till 7 days elapsed");
         if (!rewardClaimed[msg.sender]) {
-            payable(msg.sender).transfer(reward); 
+            payable(msg.sender).send(reward); 
             rewardClaimed[msg.sender] = true;
         }
         token.transfer(msg.sender,amount);
-        balances[msg.sender] -= amount;
+        balances[msg.sender] = userBal - amount;
         emit Unstaked(msg.sender, amount);
     }
 
+     function tokenReceived(address _from, uint _amount, bytes memory _data) public {
+         require(msg.sender == address(token),"Staking: Call only allowed from ERC223 token");
+         require(_amount > 0,"Staking: Non-zero");
+         _stake(_from,_amount);
+     }
 }

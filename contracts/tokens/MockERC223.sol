@@ -109,7 +109,7 @@ contract MockERC223 is IERC223 {
      * @param _value Amount of tokens that will be transferred.
      * @param _data  Transaction metadata.
      */
-    function transfer(address _to, uint256 _value, bytes calldata _data) public override returns (bool success)
+    function transfer(address _to, uint _value, bytes calldata _data) public override returns (bool success)
     {
         // Standard function transfer similar to ERC20 transfer with no _data .
         // Added due to backwards compatibility reasons .
@@ -132,7 +132,7 @@ contract MockERC223 is IERC223 {
      * @param _to    Receiver address.
      * @param _value Amount of tokens that will be transferred.
      */
-    function transfer(address _to, uint256 _value) public override returns (bool success)
+    function transfer(address _to, uint _value) public override returns (bool success)
     {
         bytes memory _empty = hex"00000000";
         balances[msg.sender] = balances[msg.sender] - _value;
