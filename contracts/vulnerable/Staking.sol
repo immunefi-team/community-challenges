@@ -16,7 +16,7 @@ contract Staking {
     event Unstaked(address indexed user, uint256 amount);
 
     constructor(address _token, uint256 _reward) payable {
-        require(msg.value >= 100, "100 ETH required");
+        require(msg.value >= 100, "Staking: Minimum ETH required");
         owner = msg.sender;
         token = IERC223(_token);
         reward = _reward;
@@ -35,7 +35,7 @@ contract Staking {
 
     function unstake(uint256 amount) public {
         uint256 userBal = balances[msg.sender];
-        require(userBal >= amount, "Staking: user doesn't have enough deposited funds");
+        require(userBal >= amount, "Staking: not enough deposited funds");
         uint256 stakedDiff = block.timestamp - stakeDuration[msg.sender];
         require(stakedDiff >= 604800, "Staking: wait till 7 days elapsed");
         if (!rewardClaimed[msg.sender]) {
@@ -52,7 +52,7 @@ contract Staking {
         uint256 _amount,
         bytes memory _data
     ) public {
-        require(msg.sender == address(token), "Staking: Call only allowed from ERC223 token");
+        require(msg.sender == address(token), "Staking: call only allowed from ERC223 token");
         require(_amount > 0, "Staking: Non-zero");
         _stake(_from, _amount);
     }
