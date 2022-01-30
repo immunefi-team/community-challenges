@@ -1,8 +1,11 @@
 
 
+* All the writeups can be found under `/writeups` directory.  
+* All the poc scripts can be found under `/pocs` directory.
+
 ```shell
 npm i
-npx hardhat run pocs/*.js
+for i in pocs/*.js; do npx hardhat run $i; done
 ```
 
 
@@ -12,7 +15,7 @@ npx hardhat run pocs/*.js
 #### Challenges Information
 
 
-| Number 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
+| Contracts 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
 |--------	|-------	|------------	|---	|--------------------	|
-| 1      	| ERC20 (transfer) 	| Easy       	|   ⌛	| pocs/1.js 	|
-|   2     	|   ⌛	|    Easy        	|   ⌛	|  pocs/2.js ⌛                  	|
+| Exchange.sol,StokenERC20.sol      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
+| Staking.sol,MockERC223.sol     	|   ⌛	|    Easy        	|   ⌛	|   ⌛                  	|
