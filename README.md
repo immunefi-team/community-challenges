@@ -8,14 +8,14 @@ npm i
 for i in pocs/*.js; do npx hardhat run $i; done
 ```
 
-
+[An Internal Link](/guides/content/editing-an-existing-page)
 
 ----
 
 #### Challenges Information
 
 
-| Contracts 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
-|--------	|-------	|------------	|---	|--------------------	|
-| `vulnerable/Exchange.sol`,<br/>`tokens/StokenERC20.sol`      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
-| `vulnerable/Staking.sol`,<br/>`tokens/MockERC223.sol`    	|   ⌛	|    Easy        	|   ⌛	|   ⌛                  	|
+| No | Contracts 	| Type  	| Difficulty 	|   Writeup published	| POC published      	|
+| ---- |--------	|-------	|------------	|---	|--------------------	|
+| 1 | [vulnerable/Exchange.sol](contracts/vulnerable/Exchange.sol),<br/>[tokens/StokenERC20.sol](contracts/tokens/StokenERC20.sol)      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
+| 2 | [vulnerable/Staking.sol](contracts/vulnerable/Staking.sol),<br/>[tokens/MockERC223.sol](contracts/tokens/MockERC223.sol)   	|   ⌛	|    Easy        	|   ⌛	|   ⌛                  	|
