@@ -8,8 +8,6 @@ npm i
 for i in pocs/*.js; do npx hardhat run $i; done
 ```
 
-[An Internal Link](/guides/content/editing-an-existing-page)
-
 ----
 
 #### Challenges Information
