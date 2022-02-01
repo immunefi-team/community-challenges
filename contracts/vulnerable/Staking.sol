@@ -39,7 +39,7 @@ contract Staking {
         uint256 stakedDiff = block.timestamp - stakeDuration[msg.sender];
         require(stakedDiff >= 604800, "Staking: wait till 7 days elapsed");
         if (!rewardClaimed[msg.sender]) {
-            payable(msg.sender).send(reward);
+            payable(msg.sender).transfer(reward);
             rewardClaimed[msg.sender] = true;
         }
         token.transfer(msg.sender, amount);
