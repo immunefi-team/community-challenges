@@ -1,20 +1,19 @@
-
-// SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 contract Takeover {
     address public owner;
     mapping(address => uint256) public deposits;
-    event OwnershipChanged(address indexed _old,address indexed _new);
+    event OwnershipChanged(address indexed _old, address indexed _new);
 
     constructor() payable {
         require(msg.value >= 10 ether, "Logical: Minimum ETH required");
         owner = msg.sender;
-        emit OwnershipChanged(address(0),owner);
+        emit OwnershipChanged(address(0), owner);
     }
 
     modifier onlyAuth() {
-        require(msg.sender == owner || msg.sender == address(this),"not allowed");
+        require(msg.sender == owner || msg.sender == address(this), "not allowed");
         _;
     }
 
@@ -26,14 +25,18 @@ contract Takeover {
         return account.code.length > 0;
     }
 
-    function changeOwner(address newOwner) onlyAuth() external {
-        require(newOwner != address(0),"no address(0)");
-        require(newOwner != owner,"no current owner");
-        emit OwnershipChanged(owner,newOwner);
+    function changeOwner(address newOwner) external onlyAuth {
+        require(newOwner != address(0), "no address(0)");
+        require(newOwner != owner, "no current owner");
+        emit OwnershipChanged(owner, newOwner);
         owner = newOwner;
     }
 
-    function staticall(address target,bytes memory payload,string memory errorMessage) external returns (bytes memory) {
+    function staticall(
+        address target,
+        bytes memory payload,
+        string memory errorMessage
+    ) external returns (bytes memory) {
         require(isContract(target), "call to non-contract");
         (bool success, bytes memory returnData) = address(target).call(payload);
         return verifyCallResult(success, returnData, errorMessage);
@@ -69,11 +72,11 @@ contract Takeover {
     function withdraw() public {
         deposits[msg.sender] -= 1;
         (bool sent, ) = msg.sender.call{value: 1 ether}("");
-        require(sent,"Failed to send Ether");
+        require(sent, "Failed to send Ether");
     }
 
     function withdrawAll() external {
-        require(msg.sender == owner,"only owner can withdraw");
+        require(msg.sender == owner, "only owner can withdraw");
         (bool sent, ) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
