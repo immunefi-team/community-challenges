@@ -17,5 +17,5 @@ for i in pocs/*.js; do npx hardhat run $i; done
 | ---- |--------	|-------	|------------	|---	|--------------------	|
 | 1 | [vulnerable/Exchange.sol](contracts/vulnerable/Exchange.sol),<br/>[tokens/StokenERC20.sol](contracts/tokens/StokenERC20.sol)      	| ERC20 (handling transfer) 	| Easy       	|   ✅	| ✅ 	|
 | 2 | [vulnerable/Staking.sol](contracts/vulnerable/Staking.sol),<br/>[tokens/MockERC223.sol](contracts/tokens/MockERC223.sol)   	|   Reentrancy	|    Easy        	|   ✅	|   ✅                  	|
-| 3  | [vulnerable/Staking.sol](contracts/vulnerable/Takeover.sol)  | Logical | Easy |  |  |
+| 3  | [vulnerable/Takeover.sol](contracts/vulnerable/Takeover.sol)  | Logical | Easy |  |  |
  
