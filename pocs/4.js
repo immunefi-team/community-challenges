@@ -4,10 +4,12 @@ const { blockchainNow, setBlockchainTime, parseEth } = require("./utils/helpers.
 
 async function deploy(deployer) {
     const Mock721 = await ethers.getContractFactory("MockERC721", deployer);
-    const mock721 = await Mock721.deploy();
 
     const Auction = await ethers.getContractFactory("Auction", deployer);
-    const auction = await Auction.deploy(mock721.address);
+    const auction = await Auction.deploy();
+
+    let mock721ContractAddr = await auction.nftContract();
+    const mock721 = await Mock721.attach(mock721ContractAddr);
 
     return [mock721, auction];
 }
@@ -35,10 +37,11 @@ async function main() {
     tx = await auction.connect(bidder2).collect(tokenId);
     await expect(tx).to.emit(auction, "TransferId").withArgs(tokenId, minter.address, bidder2.address);
 
-    // POC
+    // POC can go here:
 
     tokenId++;
     console.log("\n EXPLOIT : \n");
+
 }
 
 main();

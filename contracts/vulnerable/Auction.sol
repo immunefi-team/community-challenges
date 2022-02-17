@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: unlicensed
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-
-interface IMockERC721 is IERC721 {
-    function mint() external returns (uint256);
-}
+import "../tokens/MockERC721.sol";
 
 contract Auction {
-    IMockERC721 public nftContract;
+    MockERC721 public nftContract;
     mapping(uint256 => address) public owner;
     mapping(uint256 => uint256) public period;
     uint256 private _lockStatus = 1;
@@ -20,12 +16,15 @@ contract Auction {
     }
     mapping(uint256 => Bid) public bidInfo;
 
+    event NFTContractCreated(address nft);
     event ListedId(uint256 id, address owner);
     event TransferId(uint256 id, address from, address to);
     event BidId(uint256 id, address bidder, uint256 bidAmount);
 
-    constructor(address _nftContract) {
-        nftContract = IMockERC721(_nftContract);
+    constructor() {
+        MockERC721 _nftContract = new MockERC721();
+        nftContract = _nftContract;
+        emit NFTContractCreated(address(_nftContract));
     }
 
     modifier lock() {
