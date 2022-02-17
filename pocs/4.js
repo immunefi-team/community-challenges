@@ -41,7 +41,6 @@ async function main() {
 
     tokenId++;
     console.log("\n EXPLOIT : \n");
-
 }
 
 main();

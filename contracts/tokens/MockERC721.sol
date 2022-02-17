@@ -12,7 +12,7 @@ contract MockERC721 is ERC721 {
     }
 
     function mint() external returns (uint256) {
-        require(msg.sender == owner,"MockERC721: Only call allowed");
+        require(msg.sender == owner, "MockERC721: Only call allowed");
         _mint(msg.sender, nftId);
         uint256 currentId = nftId;
         nftId++;

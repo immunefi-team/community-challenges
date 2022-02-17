@@ -26,5 +26,4 @@ function parseEth(amount, unit) {
     return ethers.utils.parseUnits(amount, unit);
 }
 
-
 module.exports = { setBlockchainTime, blockchainNow, blockForwarder, parseEth };
