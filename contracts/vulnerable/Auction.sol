@@ -11,7 +11,7 @@ contract Auction {
     mapping(uint256 => address) public owner;
     mapping(uint256 => uint256) public period;
     uint256 private _lockStatus = 1;
-    uint256 public minBidAmount = 1 ether;
+    uint256 constant public minBidAmount = 1 ether;
 
     struct Bid {
         address bidder;
