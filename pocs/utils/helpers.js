@@ -22,4 +22,9 @@ async function setBlockchainTime(newTime, mine) {
     }
 }
 
-module.exports = { setBlockchainTime, blockchainNow, blockForwarder };
+function parseEth(amount, unit) {
+    return ethers.utils.parseUnits(amount, unit);
+}
+
+
+module.exports = { setBlockchainTime, blockchainNow, blockForwarder, parseEth };
