@@ -69,6 +69,8 @@ contract Auction {
 
         payable(owner[_id]).transfer(bidInfo[_id].bid);
         nftContract.safeTransferFrom(address(this), bidInfo[_id].bidder, _id);
-        emit TransferId(_id, owner[_id], msg.sender);
+        address currentOwner = owner[_id];
+        owner[_id] = address(0);
+        emit TransferId(_id, currentOwner, msg.sender);
     }
 }
