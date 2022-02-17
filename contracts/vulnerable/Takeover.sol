@@ -7,13 +7,13 @@ contract Takeover {
     event OwnershipChanged(address indexed _old, address indexed _new);
 
     constructor() payable {
-        require(msg.value >= 10 ether, "Logical: Minimum ETH required");
+        require(msg.value >= 10 ether, "Takeover: Minimum ETH required");
         owner = msg.sender;
         emit OwnershipChanged(address(0), owner);
     }
 
     modifier onlyAuth() {
-        require(msg.sender == owner || msg.sender == address(this), "not allowed");
+        require(msg.sender == owner || msg.sender == address(this), "Takeover: not allowed");
         _;
     }
 
@@ -26,8 +26,8 @@ contract Takeover {
     }
 
     function changeOwner(address newOwner) external onlyAuth {
-        require(newOwner != address(0), "no address(0)");
-        require(newOwner != owner, "no current owner");
+        require(newOwner != address(0), "Takeover: no address(0)");
+        require(newOwner != owner, "Takeover: no current owner");
         emit OwnershipChanged(owner, newOwner);
         owner = newOwner;
     }
@@ -37,7 +37,7 @@ contract Takeover {
         bytes memory payload,
         string memory errorMessage
     ) external returns (bytes memory) {
-        require(isContract(target), "call to non-contract");
+        require(isContract(target), "Takeover: call to non-contract");
         (bool success, bytes memory returnData) = address(target).call(payload);
         return verifyCallResult(success, returnData, errorMessage);
     }
@@ -65,19 +65,19 @@ contract Takeover {
     }
 
     function deposit() public payable {
-        require(msg.value == 1 ether, "You can only send 1 Ether");
+        require(msg.value == 1 ether, "Takeover: You can only send 1 Ether");
         deposits[msg.sender] += 1;
     }
 
     function withdraw() public {
         deposits[msg.sender] -= 1;
         (bool sent, ) = msg.sender.call{value: 1 ether}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Takeover: Failed to send Ether");
     }
 
     function withdrawAll() external {
-        require(msg.sender == owner, "only owner can withdraw");
+        require(msg.sender == owner, "Takeover: only owner can withdraw");
         (bool sent, ) = msg.sender.call{value: address(this).balance}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Takeover: Failed to send Ether");
     }
 }
