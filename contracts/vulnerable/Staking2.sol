@@ -112,16 +112,18 @@ contract Staking2 is Ownable, ReentrancyGuard {
         require(amount <= balanceBefore, "Staking2: unstake too much");
         TokenInfo storage _tokenInfo = tokenInfo[token];
         {
-            bool success;
-            {
-                // non-reverting `safeTransfer`
-                bytes memory encodedCall = abi.encodeWithSelector(token.transfer.selector, _msgSender(), amount);
-                assembly {
-                    success := call(gas(), token, 0, add(encodedCall, 0x20), mload(encodedCall), 0x00, 0x20)
-                    success := and(success, or(iszero(returndatasize()), and(gt(returndatasize(), 0x1f), mload(0x00))))
-                }
-            }
-            if (!success) {
+            // non-reverting `safeTransfer`
+            (bool success, bytes memory returnData) = address(token).call(
+                abi.encodeWithSelector(token.transfer.selector, _msgSender(), amount)
+            );
+            if (
+                !success ||
+                (
+                    returnData.length >= 32
+                        ? abi.decode(returnData, (bytes32)) != bytes32(uint256(1))
+                        : returnData.length > 0
+                )
+            ) {
                 _tokenInfo.badlyBehaved = true;
                 return;
             }
