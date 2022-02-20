@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Staking2 is Context, ReentrancyGuard {
+contract Staking2 is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     event Staked(address indexed staker, IERC20 indexed token, uint256 amount);
@@ -14,102 +14,136 @@ contract Staking2 is Context, ReentrancyGuard {
     event Unstaked(address indexed staker, IERC20 indexed token, uint256 amount);
     event Rewarded(address indexed funder, IERC20 indexed token, uint256 amount);
 
+    struct StakerInfo {
+        bool feeExempt;
+        uint248 lastReward;
+        uint256 staked;
+    }
+
     struct TokenInfo {
         bool badlyBehaved;
-        uint120 depositCount;
-        uint120 withdrawCount;
+        uint248 totalReward;
+        mapping(address => StakerInfo) stakerInfo;
     }
 
     IERC20 public immutable REWARDS;
-    mapping(IERC20 => uint256) public totalReward;
-    mapping(IERC20 => mapping(address => uint256)) public stakedAmount;
-    mapping(IERC20 => mapping(address => uint256)) public rewardDebt;
+    uint256 fees;
     mapping(IERC20 => TokenInfo) public tokenInfo;
+
+    function stakerInfo(IERC20 token, address staker)
+        external
+        view
+        returns (
+            bool feeExempt,
+            uint248 lastReward,
+            uint256 staked
+        )
+    {
+        StakerInfo storage _stakerInfo = tokenInfo[token].stakerInfo[staker];
+        feeExempt = _stakerInfo.feeExempt;
+        lastReward = _stakerInfo.lastReward;
+        staked = _stakerInfo.staked;
+    }
 
     constructor(IERC20 rewards) {
         REWARDS = rewards;
     }
 
-    function _reward(
-        uint256 amount,
-        uint256 balance,
-        IERC20 token,
-        address staker
-    ) internal view returns (uint256) {
-        return (amount * totalReward[token]) / balance - rewardDebt[token][staker];
+    function reward(IERC20 token, address staker) public view returns (uint256 amount) {
+        TokenInfo storage _tokenInfo = tokenInfo[token];
+        StakerInfo storage _stakerInfo = _tokenInfo.stakerInfo[staker];
+        uint256 balance = token.balanceOf(address(this));
+        uint256 staked = _stakerInfo.staked;
+        amount = _tokenInfo.totalReward - _stakerInfo.lastReward;
+        if (balance != 0) {
+            amount = (amount * staked) / balance;
+        }
     }
 
-    function _reward(
-        uint256 balance,
-        IERC20 token,
-        address staker
-    ) internal view returns (uint256) {
-        return _reward(stakedAmount[token][staker], balance, token, staker);
+    function sendReward(IERC20 token, address staker) public {
+        require(token != REWARDS, "Staking2: reward token");
+        TokenInfo storage _tokenInfo = tokenInfo[token];
+        require(!_tokenInfo.badlyBehaved, "Staking2: badly-behaved token");
+        uint256 amount = reward(token, staker);
+        StakerInfo storage _stakerInfo = _tokenInfo.stakerInfo[staker];
+        if (amount > 0) {
+            if (!_stakerInfo.feeExempt) {
+                uint256 fee = amount / 200;
+                fees += fee;
+                amount -= fee;
+            }
+            REWARDS.safeTransfer(staker, amount);
+            emit Claimed(staker, token, amount);
+        }
+        _stakerInfo.lastReward = _tokenInfo.totalReward;
     }
 
-    function reward(IERC20 token, address staker) public view returns (uint256) {
-        return _reward(token.balanceOf(address(this)), token, staker);
-    }
-
-    modifier goodToken(IERC20 token) {
-        require(token != REWARDS, "Staking2: can't stake reward token");
-        require(!tokenInfo[token].badlyBehaved, "Staking2: can't stake badly-behaved token");
+    modifier poke(IERC20 token) {
+        sendReward(token, _msgSender());
         _;
     }
 
-    function stake(IERC20 token, uint256 amount) external goodToken(token) {
+    function _addStake(
+        IERC20 token,
+        address staker,
+        uint256 amount
+    ) internal {
+        tokenInfo[token].stakerInfo[staker].staked += amount;
+    }
+
+    function _removeStake(
+        IERC20 token,
+        address staker,
+        uint256 amount
+    ) internal {
+        tokenInfo[token].stakerInfo[staker].staked -= amount;
+    }
+
+    function stake(IERC20 token, uint256 amount) external nonReentrant poke(token) {
         uint256 balanceBefore = token.balanceOf(address(this));
-        uint256 rewardBefore = _reward(balanceBefore, token, _msgSender());
         token.safeTransferFrom(_msgSender(), address(this), amount);
-        uint256 balanceAfter = token.balanceOf(address(this));
-        amount = balanceAfter - balanceBefore;
-        stakedAmount[token][_msgSender()] += amount;
-        tokenInfo[token].depositCount += 1;
-        uint256 rewardAfter = _reward(balanceAfter, token, _msgSender());
-        rewardDebt[token][_msgSender()] += rewardAfter - rewardBefore;
+        amount = token.balanceOf(address(this)) - balanceBefore;
+        _addStake(token, _msgSender(), amount);
         emit Staked(_msgSender(), token, amount);
     }
 
-    function claim(IERC20 token) external nonReentrant goodToken(token) {
-        uint256 amount = reward(token, _msgSender());
-        rewardDebt[token][_msgSender()] += amount;
-        REWARDS.safeTransfer(_msgSender(), amount);
-        emit Claimed(_msgSender(), token, amount);
-    }
-
-    function unstake(IERC20 token, uint256 amount) external nonReentrant goodToken(token) {
+    function unstake(IERC20 token, uint256 amount) external nonReentrant poke(token) {
         uint256 balanceBefore = token.balanceOf(address(this));
-        uint256 rewardBefore = _reward(balanceBefore, token, _msgSender());
         require(amount <= balanceBefore, "Staking2: unstake too much");
-        tokenInfo[token].withdrawCount += 1;
+        TokenInfo storage _tokenInfo = tokenInfo[token];
         {
-            (bool success, bytes memory returnData) = address(token).call(
-                abi.encodeWithSelector(token.transfer.selector, _msgSender(), amount)
-            );
-            if (
-                !success ||
-                (returnData.length >= 32 && abi.decode(returnData, (bytes32)) != bytes32(uint256(1))) ||
-                returnData.length > 0
-            ) {
-                tokenInfo[token].badlyBehaved = true;
+            bool success;
+            {
+                // non-reverting `safeTransfer`
+                bytes memory encodedCall = abi.encodeWithSelector(token.transfer.selector, _msgSender(), amount);
+                assembly {
+                    success := call(gas(), token, 0, add(encodedCall, 0x20), mload(encodedCall), 0x00, 0x20)
+                    success := and(success, or(iszero(returndatasize()), and(gt(returndatasize(), 0x1f), mload(0x00))))
+                }
+            }
+            if (!success) {
+                _tokenInfo.badlyBehaved = true;
                 return;
             }
         }
-        uint256 balanceAfter = token.balanceOf(address(this));
-        amount = balanceBefore - balanceAfter;
-        stakedAmount[token][_msgSender()] -= amount;
+        amount = balanceBefore - token.balanceOf(address(this));
         emit Unstaked(_msgSender(), token, amount);
-        uint256 rewardAmount = rewardBefore - _reward(balanceAfter, token, _msgSender());
-        if (rewardAmount != 0) {
-            rewardDebt[token][_msgSender()] -= rewardAmount;
-            REWARDS.safeTransfer(_msgSender(), rewardAmount);
-            emit Claimed(_msgSender(), token, rewardAmount);
-        }
+        _removeStake(token, _msgSender(), amount);
     }
 
-    function addReward(IERC20 token, uint256 amount) external goodToken(token) {
-        totalReward[token] += amount;
+    function addReward(IERC20 token, uint248 amount) external {
+        tokenInfo[token].totalReward += amount;
         REWARDS.safeTransferFrom(_msgSender(), address(this), amount);
         emit Rewarded(_msgSender(), token, amount);
+    }
+
+    function setExempt(IERC20 token, address staker) external onlyOwner {
+        tokenInfo[token].stakerInfo[staker].feeExempt = true;
+    }
+
+    function takeFee() external {
+        uint256 _fees = fees;
+        delete fees;
+        REWARDS.safeTransfer(owner(), _fees);
     }
 }
