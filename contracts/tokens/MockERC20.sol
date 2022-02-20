@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../interfaces/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 contract MockERC20 is Context, IERC20 {
@@ -15,8 +15,8 @@ contract MockERC20 is Context, IERC20 {
 
     constructor(uint256 _totalSupply) {
         totalSupply = _totalSupply;
-        balanceOf[msg.sender] = _totalSupply;
-        emit Transfer(address(0), msg.sender, _totalSupply);
+        balanceOf[_msgSender()] = _totalSupply;
+        emit Transfer(address(0), _msgSender(), _totalSupply);
     }
 
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
