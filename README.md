@@ -19,3 +19,4 @@ for i in pocs/*.js; do npx hardhat run $i; done
 | 2 | [vulnerable/Staking.sol](contracts/vulnerable/Staking.sol),<br/>[tokens/MockERC223.sol](contracts/tokens/MockERC223.sol)   	|   Reentrancy	|    Easy        	|   ✅	|   ✅                  	|
 | 3  | [vulnerable/Takeover.sol](contracts/vulnerable/Takeover.sol)  | Logical | Easy | ✅ | ✅ |
 | 4 | [vulnerable/Auction.sol](contracts/vulnerable/Auction.sol),<br/>[tokens/MockERC721.sol](contracts/tokens/MockERC721.sol)      	|  	|        	|   	|  	|
+| 5 | [vulnerable/Staking2.sol](contracts/vulnerable/Staking2.sol),<br/>[tokens/ExpensiveToken.sol](contracts/tokens/ExpensiveToken.sol),<br/>[tokens/MockERC777.sol](contracts/tokens/MockERC777.sol) | | Hard | | |
