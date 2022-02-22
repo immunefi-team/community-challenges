@@ -26,6 +26,10 @@ function parseEth(amount, unit) {
     return ethers.utils.parseUnits(amount, unit);
 }
 
+function prettyEth(amount) {
+    return Number(ethers.utils.formatEther(amount)).toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
 async function deploy1820() {
     const value = parseEth("0.08", "ether");
     await await network.provider.send("hardhat_setBalance", [
@@ -39,4 +43,4 @@ async function deploy1820() {
     ).wait();
 }
 
-module.exports = { setBlockchainTime, blockchainNow, blockForwarder, parseEth, deploy1820 };
+module.exports = { setBlockchainTime, blockchainNow, blockForwarder, parseEth, deploy1820, prettyEth };
