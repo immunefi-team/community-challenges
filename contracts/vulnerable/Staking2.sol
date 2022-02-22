@@ -27,6 +27,7 @@ contract Staking2 is Ownable, ReentrancyGuard {
     }
 
     IERC20 public immutable REWARDS;
+    uint256 public constant FEE_DENOM = 200;
     uint256 fees;
     mapping(IERC20 => TokenInfo) public tokenInfo;
 
@@ -68,7 +69,7 @@ contract Staking2 is Ownable, ReentrancyGuard {
         StakerInfo storage _stakerInfo = _tokenInfo.stakerInfo[staker];
         if (amount > 0) {
             if (!_stakerInfo.feeExempt) {
-                uint256 fee = amount / 200;
+                uint256 fee = amount / FEE_DENOM;
                 fees += fee;
                 amount -= fee;
             }
