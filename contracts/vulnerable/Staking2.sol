@@ -26,7 +26,7 @@ contract Staking2 is Ownable, ReentrancyGuard {
         mapping(address => StakerInfo) stakerInfo;
     }
 
-    IERC20 public immutable REWARDS; // it's safe to assume this is a well-behaved, normal ERC20
+    IERC20 public immutable REWARDS; // it's safe to assume this is a well-behaved, normal ERC20 (e.g. MockERC20)
     uint256 public constant FEE_DENOM = 200;
     uint256 fees;
     mapping(IERC20 => TokenInfo) public tokenInfo;
