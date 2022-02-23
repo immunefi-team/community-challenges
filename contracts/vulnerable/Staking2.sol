@@ -26,7 +26,7 @@ contract Staking2 is Ownable, ReentrancyGuard {
         mapping(address => StakerInfo) stakerInfo;
     }
 
-    IERC20 public immutable REWARDS;
+    IERC20 public immutable REWARDS; // it's safe to assume this is a well-behaved, normal ERC20
     uint256 public constant FEE_DENOM = 200;
     uint256 fees;
     mapping(IERC20 => TokenInfo) public tokenInfo;
@@ -117,6 +117,7 @@ contract Staking2 is Ownable, ReentrancyGuard {
             (bool success, bytes memory returnData) = address(token).call(
                 abi.encodeWithSelector(token.transfer.selector, _msgSender(), amount)
             );
+            // this is known to fail badly for tokens that implement callbacks (like ERC223 and ERC777)
             if (
                 !success ||
                 (
