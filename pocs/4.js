@@ -59,12 +59,12 @@ async function main() {
     console.log("bidder1's high bid is expected to fail.");
     await expect(auction.connect(bidder1).bid(tokenId, { value: parseEth("2", "ether") })).to.be.reverted;
 
-    console.log("bidder2's higher bid also fails.");    
+    console.log("bidder2's higher bid also fails.");
     await expect(auction.connect(bidder2).bid(tokenId, { value: parseEth("3", "ether") })).to.be.reverted;
 
-    console.log("Fast forward 7 days, it is NFT collection time!"); 
+    console.log("Fast forward 7 days, it is NFT collection time!");
     // fast forward blockchain time by 7 days
-    await ethers.provider.send("evm_mine", [(await blockchainNow()) + 804800]); 
+    await ethers.provider.send("evm_mine", [(await blockchainNow()) + 804800]);
     tx = await auctionAttack.collect(tokenId);
     await expect(tx).to.emit(auction, "TransferId").withArgs(tokenId, minter.address, auctionAttack.address);
 
