@@ -37,14 +37,14 @@ contract KYC is Ownable, Pausable {
     }
 
     function applyFor(address tokenAddr) external whenNotPaused {
-        require(tokenAddr != address(0), "KYC: token address must not be empty");
+        require(tokenAddr != address(0), "KYC: token address must not be zero");
         require(IKYCApp(tokenAddr).owner() == msg.sender, "KYC: only owner of token can apply");
         applicants[tokenAddr] = true;
         whitelistedOwners[tokenAddr] = msg.sender;
     }
 
     function onboard(address tokenAddr) external {
-        require(tokenAddr != address(0), "KYC: token address must not be empty");
+        require(tokenAddr != address(0), "KYC: token address must not be zero");
         require(msg.sender == whitelistedOwners[tokenAddr], "KYC: only owner can onboard");
         kycApplicants[tokenAddr] = true;
     }
@@ -56,7 +56,7 @@ contract KYC is Ownable, Pausable {
         bytes32 r,
         bytes32 s
     ) external whenNotPaused {
-        require(tokenAddr != address(0), "KYC: token address must not be empty");
+        require(tokenAddr != address(0), "KYC: token address must not be zero");
         bytes32 hashMsg = hashMessage(tokenAddr, data);
         _checkWhitelisted(tokenAddr, hashMsg, v, r, s);
         kycApplicants[tokenAddr] = true;
