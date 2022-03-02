@@ -13,7 +13,7 @@ async function deploy(deployer, user1, user2) {
 }
 
 async function main() {
-    let [deployer, user1, user2] = await ethers.getSigners();
+    let [deployer, user1, user2, attacker] = await ethers.getSigners();
     let [kyc, app1, app2] = await deploy(deployer, user1, user2);
 
     await kyc.connect(user1).applyFor(app1.address);
@@ -34,6 +34,7 @@ async function main() {
     await expect(await kyc.onboardedApps(app1.address)).to.equal(true);
 
     console.log("\nExploit POC : \n");
+    
 }
 
 main();
