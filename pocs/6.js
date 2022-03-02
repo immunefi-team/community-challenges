@@ -34,7 +34,6 @@ async function main() {
     await expect(await kyc.onboardedApps(app1.address)).to.equal(true);
 
     console.log("\nExploit POC : \n");
-    
 }
 
 main();
