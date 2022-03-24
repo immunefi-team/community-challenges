@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../tokens/MockERC721.sol";
@@ -10,6 +9,7 @@ contract RareNFT is Ownable, ReentrancyGuard {
     MockERC721 immutable nftContract;
     uint256 public nftPrice = 1 ether;
     uint256 private nonce;
+    uint256 private luckyVal;
 
     struct Token {
         address owner;
@@ -25,8 +25,9 @@ contract RareNFT is Ownable, ReentrancyGuard {
     event Minted(uint256 id, address owner);
     event Collected(uint256 id, address owner);
 
-    constructor() payable {
+    constructor(uint256 _luckyVal) payable {
         require(msg.value >= 1 ether, "RareNFT: requires 1 ether");
+        luckyVal = _luckyVal;
         MockERC721 _nftContract = new MockERC721();
         nftContract = _nftContract;
         emit NFTcontract(address(_nftContract));
@@ -36,6 +37,11 @@ contract RareNFT is Ownable, ReentrancyGuard {
         require(newPrice > 0,"RareNFT: new price must be greater than 0");
         emit PriceChanged(nftPrice, newPrice);
         nftPrice = newPrice;
+    }
+
+    function changeLuckyVal(uint256 _luckyVal) external onlyOwner {
+        require(_luckyVal > 0,"RareNFT: luckyVal must be greater than 0");
+        luckyVal = _luckyVal;
     }
 
     function _randGenerator(uint256 _drawNum) internal returns (uint256) {
@@ -50,8 +56,8 @@ contract RareNFT is Ownable, ReentrancyGuard {
         require(!minted[msg.sender],"RareNFT: you have already minted");
         require(msg.value == nftPrice, "RareNFT: requires mint amount");
         uint256 id = nftContract.mint();
-        uint256 lucky = _randGenerator(drawNum);
-        if (lucky == 4) {
+        uint256 randVal = _randGenerator(drawNum);
+        if (randVal == luckyVal) {
             tokenInfo[id] = Token({owner: msg.sender, value: nftPrice, rare: true});
         } else {
             tokenInfo[id] = Token({owner: msg.sender, value: nftPrice, rare: false});
