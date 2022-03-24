@@ -34,26 +34,37 @@ contract RareNFT is Ownable, ReentrancyGuard {
     }
 
     function changePrice(uint256 newPrice) external onlyOwner {
-        require(newPrice > 0,"RareNFT: new price must be greater than 0");
+        require(newPrice > 0, "RareNFT: new price must be greater than 0");
         emit PriceChanged(nftPrice, newPrice);
         nftPrice = newPrice;
     }
 
     function changeLuckyVal(uint256 _luckyVal) external onlyOwner {
-        require(_luckyVal > 0,"RareNFT: luckyVal must be greater than 0");
+        require(_luckyVal > 0, "RareNFT: luckyVal must be greater than 0");
         luckyVal = _luckyVal;
     }
 
     function _randGenerator(uint256 _drawNum) internal returns (uint256) {
         require(_drawNum > 0, "RareNFT: drawNum must be greater than 0");
-        bytes32 randHash = keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, block.coinbase, gasleft(), tx.gasprice, tx.origin, nonce, msg.sender));
-        uint256 random = uint256(randHash)% _drawNum;
+        bytes32 randHash = keccak256(
+            abi.encodePacked(
+                blockhash(block.number - 1),
+                block.timestamp,
+                block.coinbase,
+                gasleft(),
+                tx.gasprice,
+                tx.origin,
+                nonce,
+                msg.sender
+            )
+        );
+        uint256 random = uint256(randHash) % _drawNum;
         nonce++;
         return random;
     }
 
     function mint(uint256 drawNum) external payable nonReentrant {
-        require(!minted[msg.sender],"RareNFT: you have already minted");
+        require(!minted[msg.sender], "RareNFT: you have already minted");
         require(msg.value == nftPrice, "RareNFT: requires mint amount");
         uint256 id = nftContract.mint();
         uint256 randVal = _randGenerator(drawNum);
@@ -67,14 +78,14 @@ contract RareNFT is Ownable, ReentrancyGuard {
     }
 
     function collect(uint256 id) external payable nonReentrant {
-       require(!collected[msg.sender],"RareNFT: you have already collected");
-       Token memory tk  = tokenInfo[id];
-       require(tk.owner == msg.sender,"RareNFT: id doesn't belongs to you");
-       if (tk.rare) {
-           payable(msg.sender).transfer(0.1 ether);
+        require(!collected[msg.sender], "RareNFT: you have already collected");
+        Token memory tk = tokenInfo[id];
+        require(tk.owner == msg.sender, "RareNFT: id doesn't belongs to you");
+        if (tk.rare) {
+            payable(msg.sender).transfer(0.1 ether);
         }
         nftContract.safeTransferFrom(address(this), msg.sender, id);
         collected[msg.sender] = true;
-        emit Collected(id,msg.sender);
+        emit Collected(id, msg.sender);
     }
 }
