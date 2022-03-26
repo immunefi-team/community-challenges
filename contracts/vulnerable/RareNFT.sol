@@ -25,9 +25,9 @@ contract RareNFT is Ownable, ReentrancyGuard {
     event Minted(uint256 id, address owner);
     event Collected(uint256 id, address owner);
 
-    constructor(uint256 _luckyVal) payable {
+    constructor() payable {
         require(msg.value >= 1 ether, "RareNFT: requires 1 ether");
-        luckyVal = _luckyVal;
+        luckyVal = uint256(keccak256(abi.encodePacked(block.difficulty,block.timestamp))) % 5;
         MockERC721 _nftContract = new MockERC721();
         nftContract = _nftContract;
         emit NFTcontract(address(_nftContract));
