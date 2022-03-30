@@ -27,10 +27,18 @@ contract RareNFT is Ownable, ReentrancyGuard {
 
     constructor() payable {
         require(msg.value >= 1 ether, "RareNFT: requires 1 ether");
-        luckyVal = uint256(keccak256(abi.encodePacked(block.difficulty,block.timestamp))) % 5;
+        luckyVal = _luckyValGenerator();
         MockERC721 _nftContract = new MockERC721();
         nftContract = _nftContract;
         emit NFTcontract(address(_nftContract));
+    }
+
+    function _luckyValGenerator() internal view returns (uint256) {
+        uint256 num = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 5;
+        if (num == 0) {
+            num++;
+        }
+        return num;
     }
 
     function changePrice(uint256 newPrice) external onlyOwner {
@@ -80,7 +88,7 @@ contract RareNFT is Ownable, ReentrancyGuard {
     function collect(uint256 id) external payable nonReentrant {
         require(!collected[msg.sender], "RareNFT: you have already collected");
         Token memory tk = tokenInfo[id];
-        require(nftContract.ownerOf(id) == msg.sender,"RareNFT: id doesn't belongs to you");
+        require(nftContract.ownerOf(id) == msg.sender, "RareNFT: id doesn't belongs to you");
         if (tk.rare) {
             payable(msg.sender).transfer(0.1 ether);
         }
