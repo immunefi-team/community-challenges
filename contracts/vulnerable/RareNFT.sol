@@ -33,9 +33,9 @@ contract RareNFT is Ownable, ReentrancyGuard {
         emit NFTcontract(address(_nftContract));
     }
 
-    function _luckyValGenerator() internal view returns(uint256) {
-        uint256 num = uint256(keccak256(abi.encodePacked(block.difficulty,block.timestamp))) % 5;
-        if (num == 0){
+    function _luckyValGenerator() internal view returns (uint256) {
+        uint256 num = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 5;
+        if (num == 0) {
             num++;
         }
         return num;
@@ -88,7 +88,7 @@ contract RareNFT is Ownable, ReentrancyGuard {
     function collect(uint256 id) external payable nonReentrant {
         require(!collected[msg.sender], "RareNFT: you have already collected");
         Token memory tk = tokenInfo[id];
-        require(nftContract.ownerOf(id) == msg.sender,"RareNFT: id doesn't belongs to you");
+        require(nftContract.ownerOf(id) == msg.sender, "RareNFT: id doesn't belongs to you");
         if (tk.rare) {
             payable(msg.sender).transfer(0.1 ether);
         }
