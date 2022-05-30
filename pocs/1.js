@@ -55,14 +55,14 @@ async function main() {
         "token balance of {attacker} :",
         await ethers.utils.formatEther(await stoken.balanceOf(attacker.address))
     );
-    console.log("Before: ETH Balance {attacker} :", await ethers.utils.formatEther(userBeforeBal));
+    console.log("Before: ETH Balance {attacker} :", await ethers.utils.formatEther(attackerBeforeBal));
 
     await exchange.connect(attacker).enter(FIFTY_ETHER);
     await expect(await exchange.balanceOf(attacker.address)).to.equal(FIFTY_ETHER);
     await exchange.connect(attacker).exit(FIFTY_ETHER);
 
     let attackerAfterBal = await ethers.provider.getBalance(attacker.address);
-    console.log("After: ETH Balance {attacker} :", await ethers.utils.formatEther(userAfterBal));
+    console.log("After: ETH Balance {attacker} :", await ethers.utils.formatEther(attackerAfterBal));
 }
 
 main()
